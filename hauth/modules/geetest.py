@@ -1,6 +1,9 @@
 """Functions for Geetest captcha."""
 
 
+__all__ = ["get_lang_from_language"]
+
+
 def get_lang_from_language(language: str) -> str:
     """Get geetest lang from language."""
     if language in [

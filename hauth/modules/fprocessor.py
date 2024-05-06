@@ -2,6 +2,9 @@
 from ..models import Localization
 
 
+__all__ = ["process"]
+
+
 def process(path: str, language: str, localization: Localization, **kwargs) -> str:
     """Process a file, insert localization and data into it."""
     with open(path, "r", encoding="utf-8") as file:

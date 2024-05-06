@@ -12,6 +12,9 @@ from ..models import Session, State
 from . import SessionsStorage
 
 
+__all__ = ["PostgresSessionsStorage"]
+
+
 class PostgresSessionsStorage(SessionsStorage):
     """PostgreSQL sessions storage."""
 

@@ -7,6 +7,9 @@ import genshin
 from ..models import Session
 
 
+__all__ = ["SessionsStorage"]
+
+
 class SessionsStorage(abc.ABC):
     """Sessions storage."""
 

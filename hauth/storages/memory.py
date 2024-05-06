@@ -11,6 +11,9 @@ from ..models import Session
 from .import SessionsStorage
 
 
+__all__ = ["MemorySessionsStorage"]
+
+
 class MemorySessionsStorage(SessionsStorage):
     """In-memory sessions storage."""
 
