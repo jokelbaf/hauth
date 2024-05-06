@@ -8,9 +8,10 @@ import typing
 import genshin
 
 from ..models import Session
+from .import SessionsStorage
 
 
-class MemorySessionsStorage:
+class MemorySessionsStorage(SessionsStorage):
     """In-memory sessions storage."""
 
     def __init__(
@@ -21,8 +22,7 @@ class MemorySessionsStorage:
         session_id_length: typing.Optional[int] = 10,
         cleanup_interval: typing.Optional[float] = 0.5
     ) -> None:
-        """
-        Initialize SessionStorage with the following parameters.
+        """Initialize SessionStorage with the following parameters.
 
         Args:
             on_expire (typing.Optional[typing.Callable[[Session], typing.Awaitable[None]]]): A callback function that is called when session expires.
@@ -31,18 +31,14 @@ class MemorySessionsStorage:
             cleanup_interval (typing.Optional[float]): The interval in seconds to clean up expired sessions.
         """
         self.ttl = ttl
-        """The TTL for sessions in seconds."""
         self.on_expire = on_expire
-        """A callback function that is called when session expires."""
         self.session_id_length = session_id_length
-        """The length of randomly generated ID of each session."""
         self.cleanup_interval = cleanup_interval
-        """The interval in seconds to clean up expired sessions."""
+
         self._storage: typing.Mapping[str, Session] = {}
         """The in-memory storage for the sessions."""
 
     async def _cleanup_expired_sessions(self) -> None:
-        """Coroutine function to clean up expired items."""
         while True:
             expired_keys = [
                 key for key, session in self._storage.items() 
@@ -55,22 +51,13 @@ class MemorySessionsStorage:
             await asyncio.sleep(self.cleanup_interval)
 
     async def initialize(self) -> None:
-        """Initialize the storage.
-        
-        The function must be called before or after app startup.
-        """
         asyncio.create_task(self._cleanup_expired_sessions())
+        self.initialized = True
 
     async def get_session(self, id: str) -> typing.Union[Session, None]:
-        """Get session from the storage.
-        
-        Args:
-            id (str): The ID of the session.
-        """
         return self._storage.get(id, None)
 
     async def _generate_id(self) -> str:
-        """Generate a new random session ID."""
         chars = string.ascii_letters + string.digits
         existing_ids = set(self._storage.keys())
 
@@ -81,50 +68,32 @@ class MemorySessionsStorage:
 
     async def create_session(
         self, 
-        arguments: typing.Optional[typing.List[typing.Any]] = None,
+        data: typing.Optional[typing.Dict[typing.Any, typing.Any]] = None,
         language: typing.Optional[str] = "en",
         login: typing.Optional[str] = None,
         password: typing.Optional[str] = None,
         mmt: typing.Optional[genshin.models.SessionMMT] = None,
-        ticket: typing.Optional[genshin.models.ActionTicket] = None
+        ticket: typing.Optional[genshin.models.ActionTicket] = None,
+        login_result: typing.Optional[genshin.models.AppLoginResult] = None
     ) -> Session:
-        """Create a new session in the storage.
-
-        Args:
-            arguments (typing.Optional[typing.List[typing.Any]]): Arguments for the session.
-            login (typing.Optional[str]): User's login.
-            password (typing.Optional[str]): User's password.
-            mmt (typing.Optional[genshin.models.SessionMMT]): Geetest data.
-            ticket (typing.Optional[genshin.models.ActionTicket]): Email verification data.
-        """
         sid = await self._generate_id()
         session = Session(
             id=sid,
-            arguments=arguments,
+            data=data,
             language=language,
             login=login,
             password=password,
             mmt=mmt,
             ticket=ticket,
             expiration_time=(time.time() + self.ttl) if self.ttl else None,
+            login_result=login_result
         )
         self._storage[sid] = session
         return session
 
     async def update_session(self, id: str, session: Session) -> None:
-        """Update a session in the storage.
-        
-        Args:
-            id (str): The ID of the session.
-            session (Session): The new session object.
-        """
         self._storage[id] = session
 
     async def delete_session(self, id: str) -> None:
-        """Delete a session from the storage.
-        
-        Args:
-            id (str): The ID of the session.
-        """
         if id in self._storage:
             del self._storage[id]

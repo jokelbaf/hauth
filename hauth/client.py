@@ -45,7 +45,7 @@ class HAuth:
             geetest_lang=get_lang_from_language(session.language),
         )
 
-    async def _define_session_state(self, session: Session) -> None:
+    async def _define_session_state(self, session: Session) -> Session:
         """Define the state of the session.
 
         Args:
@@ -56,6 +56,7 @@ class HAuth:
                 await self._login_session(session)
             else:
                 session.state = State.LOGIN_REQUIRED
+        return session
 
     async def _login_session(
         self,
@@ -63,7 +64,7 @@ class HAuth:
         *,
         mmt_result: typing.Optional[genshin.models.SessionMMTResult] = None,
         ticket: typing.Optional[genshin.models.ActionTicket] = None
-    ) -> None:
+    ) -> Session:
         """Try to login the user."""
         try:
             client = genshin.Client()
@@ -80,6 +81,7 @@ class HAuth:
                 session.state = State.SUCCESS
         except genshin.GenshinException:
             session.state = State.LOGIN_REQUIRED
+        return session
 
     async def _email_verify_session(
         self,
@@ -87,36 +89,37 @@ class HAuth:
         *,
         code: str,
         ticket: genshin.models.ActionTicket
-    ) -> bool:
+    ) -> typing.Tuple[Session, bool]:
         """Try to verify the email. Returns `True` on success, `False` otherwise."""
         try:
             client = genshin.Client()
             await client._verify_email(code, ticket)
-            return True
+            return (session, True)
         except genshin.GenshinException:
             session.state = State.EMAIL_VERIFICATION_TRIGGERED
-            return False
+            return (session, False)
 
     async def _handle_request(
         self,
         session: Session,
         data: typing.Union[None, ReqLogin, ReqMMTResult, ReqEmailVerification] = None
     ) -> JSONResponse:
-        """Handle the request. This can be used to process the request from any framework."""
+        """Handle the request. This method can be used to process request from any framework."""
         try:
             if session.state == State.UNDEFINED:
-                await self._define_session_state(session)
+                session = await self._define_session_state(session)
 
                 if session.state == State.SUCCESS and self.config.on_success:
                     asyncio.create_task(self.config.on_success(session))
                     await self.delete_session(session.id)
 
-            if not data:
-                # Client does not know the state of the session
-                return JSONResponse(status_code=200, content=session.get_partial().model_dump())
+            if not data:  # Client does not know the state of the session
+                await self.update_session(session.id, session)
+                return JSONResponse(status_code=200, content=session.get_partial().model_dump(mode="json"))
 
             if session.state == State.LOGIN_REQUIRED:
                 if not isinstance(data, ReqLogin):
+                    await self.update_session(session.id, session)
                     return JSONResponse(
                         status_code=422, 
                         content={
@@ -129,10 +132,10 @@ class HAuth:
                 session.login = data.login
                 session.password = data.password
 
-                await self._login_session(session)
+                session = await self._login_session(session)
 
-                if session.state == State.LOGIN_REQUIRED:
-                    # Login failed
+                if session.state == State.LOGIN_REQUIRED:  # Login failed
+                    await self.update_session(session.id, session)
                     return JSONResponse(
                         status_code=200, 
                         content={
@@ -145,6 +148,7 @@ class HAuth:
 
             elif session.state == State.LOGIN_GEETEST_TRIGGERED:
                 if not isinstance(data, ReqMMTResult):
+                    await self.update_session(session.id, session)
                     return JSONResponse(
                         status_code=422, 
                         content={
@@ -154,10 +158,10 @@ class HAuth:
                             }
                         }
                     )
-                await self._login_session(session, mmt_result=data.mmt_result)
+                session = await self._login_session(session, mmt_result=data.mmt_result)
 
-                if session.state == State.LOGIN_REQUIRED:
-                    # Login failed
+                if session.state == State.LOGIN_REQUIRED:  # Login failed
+                    await self.update_session(session.id, session)
                     return JSONResponse(
                         status_code=200, 
                         content={
@@ -170,6 +174,7 @@ class HAuth:
 
             elif session.state == State.EMAIL_VERIFICATION_TRIGGERED:
                 if not isinstance(data, ReqEmailVerification):
+                    await self.update_session(session.id, session)
                     return JSONResponse(
                         status_code=422, 
                         content={
@@ -179,13 +184,13 @@ class HAuth:
                             }
                         }
                     )
-                email_verified = await self._email_verify_session(
+                session, email_verified = await self._email_verify_session(
                     session, 
                     code=data.code, 
                     ticket=session.ticket
                 )
-                if not email_verified:
-                    # Verification failed
+                if not email_verified:  # Verification failed
+                    await self.update_session(session.id, session)
                     return JSONResponse(
                         status_code=200, 
                         content={
@@ -195,10 +200,11 @@ class HAuth:
                             }
                         }
                     )
-                await self._login_session(session, ticket=session.ticket)
+                session = await self._login_session(session, ticket=session.ticket)
 
             elif session.state == State.EMAIL_GEETEST_TRIGGERED:
                 if not isinstance(data, ReqMMTResult):
+                    await self.storage.update_session(session.id, session)
                     return JSONResponse(
                         status_code=422, 
                         content={
@@ -208,13 +214,13 @@ class HAuth:
                             }
                         }
                     )
-                email_verified = await self._email_verify_session(
+                session, email_verified = await self._email_verify_session(
                     session,
                     mmt_result=data.mmt_result,
                     ticket=session.ticket
                 )
-                if not email_verified:
-                    # Verification failed
+                if not email_verified:  # Verification failed
+                    await self.update_session(session.id, session)
                     return JSONResponse(
                         status_code=200, 
                         content={
@@ -229,7 +235,8 @@ class HAuth:
                 asyncio.create_task(self.config.on_success(session))
                 await self.delete_session(session.id)
 
-            return JSONResponse(status_code=200, content=session.get_partial().model_dump())
+            await self.update_session(session.id, session)
+            return JSONResponse(status_code=200, content=session.get_partial().model_dump(mode="json"))
 
         except Exception as e:
             if self.config.on_error:
@@ -242,23 +249,24 @@ class HAuth:
 
     async def create_session(
         self,
-        arguments: typing.Optional[typing.List[typing.Any]],
+        data: typing.Optional[typing.Dict[typing.Any, typing.Any]] = None,
         language: typing.Optional[str] = "en",
         login: typing.Optional[str] = None,
         password: typing.Optional[str] = None,
         mmt: typing.Optional[genshin.models.SessionMMT] = None,
-        ticket: typing.Optional[genshin.models.ActionTicket] = None
+        ticket: typing.Optional[genshin.models.ActionTicket] = None,
+        login_result: typing.Optional[genshin.models.AppLoginResult] = None
     ) -> Session:
         """Create a new session.
 
         Args:
-            arguments (typing.Optional[typing.List[typing.Any]]): Arguments for the session.
+            data (typing.Optional[typing.Dict[typing.Any, typing.Any]]) Dict containing unique data for this session.
             login (typing.Optional[str]): User's login.
             password (typing.Optional[str]): User's password.
             mmt (typing.Optional[genshin.models.SessionMMT]): Geetest data.
             ticket (typing.Optional[genshin.models.ActionTicket]): Email verification data.
         """
-        return await self.storage.create_session(arguments, language, login, password, mmt, ticket)
+        return await self.storage.create_session(data, language, login, password, mmt, ticket, login_result)
 
     async def update_session(self, id: str, session: Session) -> None:
         """Update a session.

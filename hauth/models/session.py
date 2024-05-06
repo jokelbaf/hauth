@@ -1,6 +1,8 @@
 """Session class."""
+import datetime
+import json
 import typing
-from enum import Enum
+import enum
 
 import genshin
 import pydantic
@@ -9,7 +11,7 @@ import pydantic
 __all__ = ["State", "PartialSession", "Session"]
 
 
-class State(Enum):
+class State(enum.Enum):
     """Session state."""
 
     UNDEFINED = "undefined"
@@ -51,8 +53,6 @@ class PartialSession(pydantic.BaseModel):
     ticket: typing.Optional[genshin.models.ActionTicket] = None
     """Email verification data."""
 
-    model_config = pydantic.ConfigDict(use_enum_values=True)
-
 
 class Session(pydantic.BaseModel):
     """Session class."""
@@ -63,10 +63,10 @@ class Session(pydantic.BaseModel):
     state: State = pydantic.Field(default=State.UNDEFINED)
     """State of the session."""
 
-    arguments: typing.Optional[typing.List[typing.Any]] = None
-    """Arguments for the session.
+    data: typing.Optional[typing.Dict[typing.Any, typing.Any]] = None
+    """Dict containing unique data for this session.
 
-    These are not used by HAuth but you can use them in
+    The field is not used by HAuth but you can use it in
     the following callback functions for your own purposes:
     - `on_success` (Config)
     - `on_error` (Config)
@@ -104,4 +104,18 @@ class Session(pydantic.BaseModel):
             ticket=self.ticket
         )
 
-    model_config = pydantic.ConfigDict(use_enum_values=True)
+    @pydantic.field_validator("expiration_time", mode="before")
+    @classmethod
+    def __datetime_to_float(cls, v: typing.Any) -> str:
+        """Convert datetime to float."""
+        if isinstance(v, datetime.datetime):
+            return v.timestamp()
+        return v
+
+    @pydantic.field_validator("mmt", "ticket", mode="before")
+    @classmethod
+    def __str_to_dict(cls, v: typing.Any) -> typing.Optional[typing.Dict[typing.Any, typing.Any]]:
+        """Convert string representation of model to dict."""
+        if isinstance(v, str):
+            return json.loads(v)
+        return v
