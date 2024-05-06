@@ -78,8 +78,7 @@ class HAuth:
             else:
                 session.login_result = result
                 session.state = State.SUCCESS
-        except genshin.GenshinException as e:
-            print(e)
+        except genshin.GenshinException:
             session.state = State.LOGIN_REQUIRED
 
     async def _email_verify_session(
