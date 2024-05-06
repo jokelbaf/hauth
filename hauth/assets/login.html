@@ -667,7 +667,6 @@
             if (this.session.state === 'undefined') {
                 this.session = await this.sendRequest(null, true);
             }
-            console.log(this.session);
             document.getElementById('loader').classList.add('hide');
             this.runForm();
         }
