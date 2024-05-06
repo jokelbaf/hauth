@@ -65,7 +65,13 @@ class HAuth:
         mmt_result: typing.Optional[genshin.models.SessionMMTResult] = None,
         ticket: typing.Optional[genshin.models.ActionTicket] = None
     ) -> Session:
-        """Try to login the user."""
+        """Try to login the user.
+        
+        Args:
+            session (Session): The session to login.
+            mmt_result (typing.Optional[genshin.models.SessionMMTResult]): Result of solving the geetest.
+            ticket (typing.Optional[genshin.models.ActionTicket]): Email verification ticket.
+        """
         try:
             client = genshin.Client()
             result = await client._app_login(session.login, session.password, encrypted=True, mmt_result=mmt_result, ticket=ticket)
@@ -90,7 +96,13 @@ class HAuth:
         code: str,
         ticket: genshin.models.ActionTicket
     ) -> typing.Tuple[Session, bool]:
-        """Try to verify the email. Returns `True` on success, `False` otherwise."""
+        """Try to verify the email. Returns `True` on success, `False` otherwise.
+        
+        Args:
+            session (Session): The session to verify the email.
+            code (str): Email verification code.
+            ticket (genshin.models.ActionTicket): Email verification ticket.
+        """
         try:
             client = genshin.Client()
             await client._verify_email(code, ticket)
@@ -104,7 +116,12 @@ class HAuth:
         session: Session,
         data: typing.Union[None, ReqLogin, ReqMMTResult, ReqEmailVerification] = None
     ) -> JSONResponse:
-        """Handle the request. This method can be used to process request from any framework."""
+        """Handle the request. This method can be used to process request from any framework.
+        
+        Args:
+            session (Session): The session to handle the request for.
+            data (typing.Union[None, ReqLogin, ReqMMTResult, ReqEmailVerification]): Request data.
+        """
         try:
             if session.state == State.UNDEFINED:
                 session = await self._define_session_state(session)
@@ -261,16 +278,18 @@ class HAuth:
 
         Args:
             data (typing.Optional[typing.Dict[typing.Any, typing.Any]]) Dict containing unique data for this session.
+            language (typing.Optional[str]): User's language.
             login (typing.Optional[str]): User's login.
             password (typing.Optional[str]): User's password.
             mmt (typing.Optional[genshin.models.SessionMMT]): Geetest data.
             ticket (typing.Optional[genshin.models.ActionTicket]): Email verification data.
+            login_result (typing.Optional[genshin.models.AppLoginResult]): The login result added to session after successful login.
         """
         return await self.storage.create_session(data, language, login, password, mmt, ticket, login_result)
 
     async def update_session(self, id: str, session: Session) -> None:
         """Update a session.
-        
+
         Args:
             id (str): The ID of the session.
             session (Session): The new session object.
@@ -279,7 +298,7 @@ class HAuth:
 
     async def delete_session(self, id: str) -> None:
         """Delete a session.
-        
+
         Args:
             id (str): The ID of the session.
         """
