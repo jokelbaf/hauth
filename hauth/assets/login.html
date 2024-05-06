@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html class="color-{{color}} theme-{{theme_mode}}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{login_page_title}}</title>
+    <script src="{{js_path}}"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        html.theme-light {
+            --bg: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --text: #4f4f4f;
+            --text-secondary: #b0b0b0;
+            --msg-bg: rgba(0, 0, 0, 0.25);
+            --error: #d64141;
+
+            --shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        html.theme-dark {
+            --bg: #333333;
+            --bg-secondary: #444444;
+            --text: #e4e4e4;
+            --text-secondary: #b0b0b0;
+            --msg-bg: rgba(255, 255, 255, 0.2);
+            --error: #d64141;
+
+            --shadow: none;
+        }
+        
+        @media (prefers-color-scheme: light) {
+            html.theme-auto {
+                --bg: #f5f5f5;
+                --bg-secondary: #ffffff;
+                --text: #4f4f4f;
+                --text-secondary: #b0b0b0;
+                --msg-bg: rgba(0, 0, 0, 0.25);
+                --error: #d64141;
+
+                --shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+        }
+        @media (prefers-color-scheme: dark) {
+            html.theme-auto {
+                --bg: #333333;
+                --bg-secondary: #444444;
+                --text: #e4e4e4;
+                --text-secondary: #b0b0b0;
+                --msg-bg: rgba(255, 255, 255, 0.25);
+                --error: #d64141;
+
+                --shadow: none;
+            }
+        }
+        
+        html.color-red {
+            --primary: #f44336;
+            --primary-hover: #d32f2f;
+            --btn-text: #ffffff;
+        }
+        html.color-blue {
+            --primary: #2196F3;
+            --primary-hover: #1d80d1;
+            --btn-text: #ffffff;
+        }
+        html.color-green {
+            --primary: #4CAF50;
+            --primary-hover: #388E3C;
+            --btn-text: #ffffff;
+        }
+        html.color-yellow {
+            --primary: #f4e030;
+            --primary-hover: #e1cf2f;
+            --btn-text: #000000;
+        }
+        html.color-purple {
+            --primary: #b520ce;
+            --primary-hover: #9e1fb3;
+            --btn-text: #ffffff;
+        }
+        html.color-orange {
+            --primary: #FF9800;
+            --primary-hover: #F57C00;
+            --btn-text: #ffffff;
+        }
+        html.color-light_blue {
+            --primary: #03A9F4;
+            --primary-hover: #039BE5;
+            --btn-text: #ffffff;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        body .loader {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 997;
+            display: flex;
+            position: fixed;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-secondary);
+            transition: 
+                opacity         0.25s ease-in-out, 
+                pointer-events  0.25s ease-in-out;
+        }
+        body .loader.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+        body .loader .spinner,
+        body .form .form-loader .spinner
+        {
+            -webkit-animation: spinner-rotate 2s linear infinite;
+                    animation: spinner-rotate 2s linear infinite;
+            margin: -25px 0 0 -25px;
+            position: absolute;
+            height: 50px;
+            width: 50px;
+            left: 50%;
+            top: 50%;
+        }
+        body .loader .spinner .path,
+        body .form .form-loader .spinner .path
+        {
+            stroke: var(--primary);
+            stroke-linecap: round;
+            -webkit-animation: spinner-dash 1.5s ease-in-out infinite;
+                    animation: spinner-dash 1.5s ease-in-out infinite;
+        }
+        @keyframes spinner-rotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        @-webkit-keyframes spinner-rotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        @keyframes spinner-dash {
+            0% {
+                stroke-dasharray: 1, 150;
+                stroke-dashoffset: 0;
+            }
+            50% {
+                stroke-dasharray: 90, 150;
+                stroke-dashoffset: -35;
+            }
+            100% {
+                stroke-dasharray: 90, 150;
+                stroke-dashoffset: -124;
+            }
+        }
+        @-webkit-keyframes spinner-dash {
+            0% {
+                stroke-dasharray: 1, 150;
+                stroke-dashoffset: 0;
+            }
+            50% {
+                stroke-dasharray: 90, 150;
+                stroke-dashoffset: -35;
+            }
+            100% {
+                stroke-dasharray: 90, 150;
+                stroke-dashoffset: -124;
+            }
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg);
+        }
+
+        body h1,
+        body h2,
+        body h3,
+        body h4,
+        body h5,
+        body h6,
+        body p {
+            color: var(--text);
+        }
+
+        body > .error {
+            top: -25%;
+            left: -25%;
+            width: 150%;
+            height: 150%;
+            z-index: 998;
+            display: flex;
+            position: fixed;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.25);
+            transition:
+                scale           0.2s ease-in-out,
+                opacity         0.2s ease-in-out, 
+                pointer-events  0.2s ease-in-out;
+        }
+        body > .error.hide {
+            opacity: 0;
+            scale: 0.75;
+            pointer-events: none;
+        }
+        body > .error div {
+            width: 90%;
+            padding: 15px;
+            display: flex;
+            max-width: 400px;
+            text-align: left;
+            border-radius: 10px;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            background-color: var(--bg-secondary);
+        }
+        body > .error div h1 {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        body > .error div p {
+            font-size: 1em;
+            font-weight: 400;
+            margin-bottom: 15px;
+        }
+        body > .error div button {
+            border: none;
+            font-size: 1em;
+            cursor: pointer;
+            margin-right: 0;
+            font-weight: 500;
+            margin-left: auto;
+            border-radius: 5px;
+            padding: 10px 20px;
+            color: var(--btn-text);
+            background-color: var(--primary);
+            transition: background-color 0.15s ease-in-out;
+        }
+        body > .error div button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        body > .msg {
+            top: 50%;
+            left: 50%;
+            z-index: 999;
+            padding: 10px;
+            position: fixed;
+            pointer-events: none;
+            border-radius: 7.5px;
+            backdrop-filter: blur(15px);
+            background-color: var(--msg-bg);
+            transform: translate(-50%, -50%);
+        }
+        body > .msg p {
+            font-size: 1em;
+            font-weight: 400;
+        }
+
+        body .form {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+            align-items: center;
+            border-radius: 15px;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            background-color: var(--bg-secondary);
+            transition: 
+                width  0.25s ease-in-out,
+                height 0.25s ease-in-out;
+        }
+        body .form.login {
+            width: 330px;
+            height: 440px;
+        }
+        body .form.email-verification {
+            width: 330px;
+            height: 190px;
+        }
+        body .form.complete {
+            width: 330px;
+            height: 200px;
+        }
+
+        body .form .form-loader {
+            opacity: 0;
+            width: 100px;
+            height: 100px;
+            transition: opacity 0.25s ease-in-out;
+        }
+        body .form:not(.login):not(.email-verification):not(.complete) .form-loader {
+            opacity: 1;
+        }
+
+        body .form .login {
+            top: 50%;
+            left: 50%;
+            opacity: 0;
+            width: 330px;
+            height: 440px;
+            display: flex;
+            padding: 20px;
+            visibility: hidden;
+            position: absolute;
+            align-items: center;
+            pointer-events: none;
+            flex-direction: column;
+            transform-origin: top left;
+            transform: scale(0.7) translateX(-50%) translateY(-50%);
+            transition: 
+                visibility  0.25s ease-in-out,
+                transform   0.25s ease-in-out,
+                opacity     0.25s ease-in-out;
+        }
+        body .form.login .login {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+            transform: scale(1) translateX(-50%) translateY(-50%);
+        }
+        body .form .login svg {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            fill: var(--primary);
+        }
+        body .form .login h2 {
+            font-size: 1.5em;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+        body .form .login input {
+            width: 100%;
+            border: none;
+            font-size: 0.95em;
+            color: var(--text);
+            border-radius: 5px;
+            margin-bottom: 20px;
+            padding: 12.5px 15px;
+            background-color: var(--bg);
+        }
+        body .form .login input:focus {
+            outline: 1px solid var(--primary);
+        }
+        body .form .login input::placeholder {
+            color: var(--text-secondary);
+        }
+        body .form .login p {
+            width: 100%;
+            font-size: 0.9em;
+            font-weight: 400;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        body .form .login p span {
+            color: var(--text-secondary);
+        }
+        body .form .login button {
+            width: 100%;
+            border: none;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: 500;
+            border-radius: 5px;
+            padding: 12px 20px;
+            color: var(--btn-text);
+            background-color: var(--primary);
+            transition: background-color 0.15s ease-in-out;
+        }
+        body .form .login button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        body .form .email-verification {
+            top: 50%;
+            left: 50%;
+            opacity: 0;
+            width: 330px;
+            height: 190px;
+            display: flex;
+            padding: 20px;
+            visibility: hidden;
+            position: absolute;
+            align-items: center;
+            pointer-events: none;
+            flex-direction: column;
+            transform-origin: top left;
+            transform: scale(0.7) translateX(-50%) translateY(-50%);
+            transition:
+                visibility  0.25s ease-in-out,
+                transform   0.25s ease-in-out,
+                opacity     0.25s ease-in-out;
+        }
+        body .form.email-verification .email-verification {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+            transform: scale(1) translateX(-50%) translateY(-50%);
+        }
+        body .form .email-verification h2 {
+            margin-top: 5px;
+            font-size: 1.5em;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+        body .form .email-verification .inputs {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+        body .form .email-verification .inputs.error input {
+            border: 1px solid var(--error);
+        }
+        body .form .email-verification .inputs.error input:focus {
+            outline: 1px solid transparent;
+        }
+        body .form .email-verification .inputs input {
+            border: none;
+            font-size: 1em;
+            color: var(--text);
+            border-radius: 5px;
+            padding: 10px 10px;
+            text-align: center;
+            background-color: var(--bg);
+            width: calc(100%/6 - 2px * 5);
+        }
+        body .form .email-verification .inputs input:focus {
+            outline: 1px solid var(--primary);
+        }
+        body .form .email-verification .inputs input::placeholder {
+            color: var(--text-secondary);
+        }
+        body .form .email-verification p {
+            width: 100%;
+            font-size: 0.9em;
+            font-weight: 400;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        body .form .email-verification p span {
+            color: var(--text-secondary);
+        }
+
+        body .form .complete {
+            top: 50%;
+            left: 50%;
+            opacity: 0;
+            width: 330px;
+            height: 200px;
+            display: flex;
+            padding: 20px;
+            visibility: hidden;
+            position: absolute;
+            align-items: center;
+            pointer-events: none;
+            flex-direction: column;
+            transform-origin: top left;
+            transform: scale(0.7) translateX(-50%) translateY(-50%);
+            transition:
+                visibility  0.25s ease-in-out,
+                transform   0.25s ease-in-out,
+                opacity     0.25s ease-in-out;
+        }
+        body .form.complete .complete {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+            transform: scale(1) translateX(-50%) translateY(-50%);
+        }
+        body .form .complete svg {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            fill: var(--primary);
+        }
+        body .form .complete h2 {
+            font-size: 1.5em;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        body .form .complete p {
+            width: 100%;
+            font-size: 0.9em;
+            font-weight: 400;
+            text-align: center;
+            margin-bottom: 17.5px;
+        }
+        body .form .complete p span {
+            color: var(--text-secondary);
+        }
+
+        body .form .loading-line {
+            top: 0;
+            left: 0;
+            opacity: 0;
+            width: 100%;
+            height: 4px;
+            overflow: hidden;
+            visibility: hidden;
+            position: absolute;
+            display: inline-block;
+            transition:
+                visibility  0.25s ease-in-out,
+                opacity     0.25s ease-in-out;
+        }
+        body .form.loading .loading-line {
+            opacity: 1;
+            visibility: visible;
+        }
+        body .form .loading-line::after {
+            top: 0;
+            left: 0;
+            content: '';
+            width: 100%;
+            height: 4px;
+            position: absolute;
+            box-sizing: border-box;
+            background: var(--primary);
+            animation: line-slide 0.75s linear infinite;
+        }
+        @keyframes line-slide {
+            0% {
+                left: 0;
+                transform: translateX(-100%);
+            }
+            100% {
+                left: 100%;
+                transform: translateX(0%);
+            }
+        }
+  
+        body .form.loading {
+            pointer-events: none;
+        }
+        body .form.loading .login,
+        body .form.loading .email-verification
+        {
+            opacity: 0.9;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader" id="loader">
+        <svg class="spinner" viewBox="0 0 50 50">
+            <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+        </svg>
+    </div>
+    <div class="error hide" id="error">
+        <div>
+            <h1></h1>
+            <p></p>
+            <button id="error-close">
+                {{close}}
+            </button>
+        </div>
+    </div>
+    <div class="form" id="login-form">
+        <span class="loading-line"></span>
+        <div class="form-loader" id="form-loader">
+            <svg class="spinner" viewBox="0 0 50 50">
+                <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+            </svg>
+        </div>
+        <div class="login" id="login">
+            <svg xmlns="http://www.w3.org/2000/svg" width="90px" height="90px" data-name="Layer 1" viewBox="0 0 29 29" id="user">
+                <path d="M14.5 2A12.514 12.514 0 0 0 2 14.5 12.521 12.521 0 0 0 14.5 27a12.5 12.5 0 0 0 0-25Zm7.603 19.713a8.48 8.48 0 0 0-15.199.008A10.367 10.367 0 0 1 4 14.5a10.5 10.5 0 0 1 21 0 10.368 10.368 0 0 1-2.897 7.213ZM14.5 7a4.5 4.5 0 1 0 4.5 4.5A4.5 4.5 0 0 0 14.5 7Z"/>
+            </svg>
+            <h2>{{login_title}}</h2>
+            <p>{{login_description}}</p>
+            <form>
+                <input id="email" placeholder="{{email}}">
+                <input id="password" type="password" placeholder="{{password}}">
+            </form>
+            <button id="login-btn">{{login}}</button>
+        </div>
+        <div class="email-verification" id="email-verification">
+            <h2>{{email_verification_title}}</h2>
+            <p>{{email_verification_description}}</p>
+            <div class="inputs" id="code">
+                <input class="number" data-index="0" maxlength="1">
+                <input class="number" data-index="1" maxlength="1">
+                <input class="number" data-index="2" maxlength="1">
+                <input class="number" data-index="3" maxlength="1">
+                <input class="number" data-index="4" maxlength="1">
+                <input class="number" data-index="5" maxlength="1">
+            </div>
+        </div>
+        <div class="complete" id="complete">
+            <svg xmlns="http://www.w3.org/2000/svg" width="90px" height="90px" viewBox="0 0 24 24">
+                <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-1.25 17.292l-4.5-4.364 1.857-1.858 2.643 2.506 5.643-5.784 1.857 1.857-7.5 7.643z"/>
+            </svg>
+            <h2>{{complete_title}}</h2>
+            <p></p>
+        </div>
+    </div>
+</body>
+<script>
+    const RSA_KEY_CERT =
+    '-----BEGIN PUBLIC KEY-----\n' +
+    'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4PMS2JVMwBsOIrYWRluY\n' +
+    'wEiFZL7Aphtm9z5Eu/anzJ09nB00uhW+ScrDWFECPwpQto/GlOJYCUwVM/raQpAj\n' +
+    '/xvcjK5tNVzzK94mhk+j9RiQ+aWHaTXmOgurhxSp3YbwlRDvOgcq5yPiTz0+kSeK\n' +
+    'ZJcGeJ95bvJ+hJ/UMP0Zx2qB5PElZmiKvfiNqVUk8A8oxLJdBB5eCpqWV6CUqDKQ\n' +
+    'KSQP4sM0mZvQ1Sr4UcACVcYgYnCbTZMWhJTWkrNXqI8TMomekgny3y+d6NX/cFa6\n' +
+    '6jozFIF4HCX5aW8bp8C8vq2tFvFbleQ/Q3CU56EWWKMrOcpmFtRmC18s9biZBVR/\n' +
+    '8QIDAQAB\n' +
+    '-----END PUBLIC KEY-----'
+
+    const encrypt = (text) => {
+        const encrypt = new JSEncrypt();
+        encrypt.setPublicKey(RSA_KEY_CERT);
+        return encrypt.encrypt(text);
+    }
+
+    const errorEl = document.getElementById('error');
+    const emailField = document.getElementById('email');
+    const codeContainer = document.getElementById('code');
+    const passwordField = document.getElementById('password');
+    const closeButtonEl = document.getElementById('error-close');
+
+    closeButtonEl.addEventListener('click', () => {
+        errorEl.classList.add('hide');
+        if (closeButtonEl.classList.contains('reload')) {
+            window.location.reload();
+        }
+    });
+
+    const stringInject = (string, data) => {
+        for (const key in data) {
+            string = string.replace(new RegExp('\\|\\|' + key + '\\|\\|', 'g'), data[key]);
+        }
+        return string;
+    }
+
+    class SessionStateManager {
+        constructor() {
+            this.callbackUrl = '{{callback_url}}';
+            this.session = JSON.parse('{{session}}');
+        }
+        async load() {
+            if (this.session.state === 'undefined') {
+                this.session = await this.sendRequest(null, true);
+            }
+            console.log(this.session);
+            document.getElementById('loader').classList.add('hide');
+            this.runForm();
+        }
+        async run() {
+            if (this.session.state === 'login_required') {
+                this.runForm(true);
+                const session = await this.sendRequest({
+                    login: encrypt(emailField.value),
+                    password: encrypt(passwordField.value)
+                });
+                if (!session) { return; } else { this.session = session; }
+                this.runForm();
+            } else if (this.session.state === 'email_verification_triggered') {
+                this.runForm(true);
+                const session = await this.sendRequest({code: getCode()});
+                if (!session) { 
+                    return codeContainer.classList.add('error'); 
+                } else { 
+                    this.session = session; 
+                }
+                this.runForm();
+            }
+        }
+        runForm(loading = false) {
+            const form = document.getElementById('login-form');
+            if (loading) return form.classList.add('loading');
+
+            form.classList.remove('login', 'email-verification', 'complete', 'loading');
+
+            if (this.session.state === 'login_required') {
+                form.classList.add('login');
+            }
+            else if (
+                this.session.state == 'login_geetest_triggered' ||
+                this.session.state == 'email_geetest_triggered'
+            ) {
+                this.handleGeetest(async (captcha) => {
+                    const session = await this.sendRequest({
+                        mmt_result: {
+                            session_id: this.session.mmt.session_id,
+                            ...captcha.getValidate()
+                        }
+                    });
+                    if (!session) { return; } else { this.session = session; }
+                    await this.runForm();
+                });
+            }
+            else if (this.session.state === 'email_verification_triggered') {
+                form.classList.add('email-verification');
+            }
+            else if (this.session.state === 'success') {
+                form.classList.add('complete');
+                document.getElementById('complete').querySelector('p').innerText = stringInject(
+                    stateManager.callbackUrl ? '{{complete_description}}' : '{{complete_description_no_callback}}',
+                    {seconds: 5}
+                );
+                if (stateManager.callbackUrl) {
+                    setTimeout(() => {
+                        window.location.href = stateManager.callbackUrl;
+                    }, 5000);
+                }
+            }
+        }
+        async handleGeetest(callback) {
+            window.initGeetest(
+                {
+                    gt: this.session.mmt.gt,
+                    challenge: this.session.mmt.challenge,
+                    new_captcha: this.session.mmt.new_captcha,
+                    https: /^https/i.test(window.location.protocol),
+                    api_server: 'api-na.geetest.com',
+                    lang: '{{geetest_lang}}',
+                    product: 'bind',
+                },
+                (captcha) => {
+                    captcha.onReady(() => {
+                        captcha.verify();
+                    });
+                    captcha.onSuccess(() => { callback(captcha); });
+                }
+            );
+        }
+        async sendRequest(payload, reload = false) {
+            const response = await fetch(`{{api_login_path}}/${this.session.id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: payload ? JSON.stringify(payload) : null
+            });
+            const data = await response.json();
+            if (response.status !== 200) {
+                this.handleError(
+                    data.error ? data.error.title : '{{default_error_title}}',
+                    data.error ? data.error.message : stringInject(
+                        '{{default_error_message}}', {status: response.status}
+                    ),
+                    reload
+                );
+                return undefined;
+            }
+            if (data.error) {
+                this.session = await this.sendRequest(null, true); // Refresh the session
+                this.runForm();
+                this.showMsg(data.error.message);
+                return undefined;
+            }
+            return data;
+        }
+        handleError(errorTitle, errorMessage, reload){
+            if (reload) {
+                closeButtonEl.classList.add('reload');
+            } else {
+                closeButtonEl.classList.remove('reload');
+            }
+            errorEl.querySelector('h1').innerText = errorTitle;
+            errorEl.querySelector('p').innerText = errorMessage;
+            errorEl.classList.remove('hide');
+        }
+        showMsg(message) {
+            document.querySelectorAll('.msg').forEach(msg => msg.parentNode.removeChild(msg));
+
+            const msgEl = document.createElement('div');
+            msgEl.classList.add('msg');
+            msgEl.innerHTML = `<p>${message}</p>`;
+            document.body.appendChild(msgEl);
+
+            setTimeout(() => {
+                if (!msgEl.parentNode) return;
+                document.body.removeChild(msgEl);
+            }, 5000);
+        }
+    }
+    stateManager = new SessionStateManager();
+
+    window.onload = async () => { await stateManager.load(); }
+
+    document.getElementById('login-btn').addEventListener('click', async () => {
+        if (!emailField.value || !passwordField.value) {
+            return stateManager.showMsg('{{fields_empty}}');
+        }
+        await stateManager.run();
+    });
+
+    const getCode = () => {
+        return Array.from(document.querySelectorAll('input.number')).map(input => input.value).join('');
+    }
+
+    const codeInputs = document.querySelectorAll('input.number');
+
+    codeInputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            const value = e.target.value;
+            if (value.length > 0) {
+                if (index < codeInputs.length - 1) {
+                    codeInputs[index + 1].focus();
+                }
+            }
+        });
+        input.addEventListener('keydown', (e) => {
+            const key = e.key;
+            if ((key === 'ArrowRight' || key === 'ArrowUp')) {
+                if (index < codeInputs.length - 1) {
+                    codeInputs[index + 1].focus();
+                    e.preventDefault();
+                }
+            } else if ((key === 'ArrowLeft' || key === 'ArrowDown')) {
+                if (index > 0) {
+                    codeInputs[index - 1].focus();
+                    e.preventDefault();
+                }
+            } else if (
+                key === 'Backspace' && 
+                input.selectionStart === 0 && index > 0
+            ) {
+                codeInputs[index - 1].focus();
+            }
+        });
+        input.addEventListener('paste', async (e) => {
+            e.preventDefault();
+            const data = e.clipboardData.getData('text');
+            if (data.length >= 6 && !isNaN(data)) {
+                codeInputs.forEach((input, index) => {
+                    input.value = data[index];
+                });
+                await stateManager.run();
+            }
+        });
+        input.addEventListener('focus', (e) => {
+            e.target.selectionStart = e.target.selectionEnd = e.target.value.length;
+        });
+        input.addEventListener('click', (e) => {
+            e.target.selectionStart = e.target.selectionEnd = e.target.value.length;
+        });
+        input.addEventListener('input', async (e) => {
+            if (isNaN(e.data)) {
+                return e.target.value = '';
+            }
+            codeContainer.classList.remove('error');
+            const code = getCode();
+
+            if (code.length === 6) {
+                await stateManager.run();
+            }
+        });
+    });
+</script>
+</html>

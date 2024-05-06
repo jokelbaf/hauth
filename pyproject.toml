@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "hauth"
+license = "MIT"
+version = "0.1.0"
+description = "A simple and user-friendly package for authenticating in HoYoLab API via web interface."
+authors = [
+    "JokelBaf <jokelbaf@gmail.com>",
+]
+maintainers = [
+    "JokelBaf <jokelbaf@gmail.com>",
+]
+readme = "README.md"
+homepage = "https://github.com/jokelbaf/hauth"
+repository = "https://github.com/jokelbaf/hauth"
+documentation = "https://jokelbaf.github.io/hauth"
+keywords = ["genshin", "hoyolab", "honkai", "auth"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+genshin = { git = "https://github.com/thesadru/genshin.py.git", branch = "dev" }
