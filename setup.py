@@ -15,7 +15,7 @@ setup(
     },
     packages = find_packages(exclude=["tests.*"]),
     python_requires = ">=3.8",
-    install_requires = ["aiohttp"],
+    install_requires = ["genshin @ git+https://github.com/thesadru/genshin.py.git@dev"],
     include_package_data = True,
     package_data = {"hauth": ["py.typed"]},
     long_description = open("README.md", encoding="utf-8").read(),
