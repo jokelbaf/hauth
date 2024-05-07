@@ -1,6 +1,3 @@
-[project]
-name = "hauth"
-version = "0.1.0"
 [tool.poetry]
 name = "hauth"
 license = "MIT"
