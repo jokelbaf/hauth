@@ -24,6 +24,7 @@ def HAuthFastAPI(
     This will attach the necessary routes and HAuth to the FastAPI app.
 
     Args:
+        app (FastAPI): The FastAPI app.
         session_storage (MemorySessionsStorage): The session storage.
         hauth_config (typing.Optional[Config], optional): The configuration for HoYoLab Auth.
     """
