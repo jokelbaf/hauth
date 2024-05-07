@@ -56,7 +56,7 @@ class SessionsStorage(abc.ABC):
         self, 
         data: typing.Optional[typing.Dict[typing.Any, typing.Any]] = None,
         language: typing.Optional[str] = "en",
-        login: typing.Optional[str] = None,
+        account: typing.Optional[str] = None,
         password: typing.Optional[str] = None,
         mmt: typing.Optional[genshin.models.SessionMMT] = None,
         ticket: typing.Optional[genshin.models.ActionTicket] = None,
@@ -67,7 +67,7 @@ class SessionsStorage(abc.ABC):
         Args:
             data (typing.Optional[typing.Dict[typing.Any, typing.Any]]): Dict containing unique data for this session.
             language (typing.Optional[str]): User's language.
-            login (typing.Optional[str]): User's login.
+            account (typing.Optional[str]): User's account. Can be either email or username.
             password (typing.Optional[str]): User's password.
             mmt (typing.Optional[genshin.models.SessionMMT]): Geetest data.
             ticket (typing.Optional[genshin.models.ActionTicket]): Email verification data.

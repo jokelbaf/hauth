@@ -76,8 +76,8 @@ class Session(pydantic.BaseModel):
     language: typing.Optional[str] = pydantic.Field(default="en")
     """User's language. Default to `en`."""
 
-    login: typing.Optional[str] = None
-    """User's login."""
+    account: typing.Optional[str] = None
+    """User's account. Can be either email or username."""
 
     password: typing.Optional[str] = None
     """User's password."""

@@ -52,7 +52,7 @@ class HAuth:
             session (Session): The session to define the state for.
         """
         if session.state == State.UNDEFINED:
-            if session.login and session.password:
+            if session.account and session.password:
                 await self._login_session(session)
             else:
                 session.state = State.LOGIN_REQUIRED
@@ -74,7 +74,7 @@ class HAuth:
         """
         try:
             client = genshin.Client()
-            result = await client._app_login(session.login, session.password, encrypted=True, mmt_result=mmt_result, ticket=ticket)
+            result = await client._app_login(session.account, session.password, encrypted=True, mmt_result=mmt_result, ticket=ticket)
 
             if isinstance(result, genshin.models.SessionMMT):
                 session.state = State.LOGIN_GEETEST_TRIGGERED
@@ -146,7 +146,7 @@ class HAuth:
                             }
                         }
                     )
-                session.login = data.login
+                session.account = data.account
                 session.password = data.password
 
                 session = await self._login_session(session)
@@ -268,7 +268,7 @@ class HAuth:
         self,
         data: typing.Optional[typing.Dict[typing.Any, typing.Any]] = None,
         language: typing.Optional[str] = "en",
-        login: typing.Optional[str] = None,
+        account: typing.Optional[str] = None,
         password: typing.Optional[str] = None,
         mmt: typing.Optional[genshin.models.SessionMMT] = None,
         ticket: typing.Optional[genshin.models.ActionTicket] = None,
@@ -279,13 +279,13 @@ class HAuth:
         Args:
             data (typing.Optional[typing.Dict[typing.Any, typing.Any]]) Dict containing unique data for this session.
             language (typing.Optional[str]): User's language.
-            login (typing.Optional[str]): User's login.
+            account (typing.Optional[str]): User's account. Can be either email or username.
             password (typing.Optional[str]): User's password.
             mmt (typing.Optional[genshin.models.SessionMMT]): Geetest data.
             ticket (typing.Optional[genshin.models.ActionTicket]): Email verification data.
             login_result (typing.Optional[genshin.models.AppLoginResult]): The login result added to session after successful login.
         """
-        return await self.storage.create_session(data, language, login, password, mmt, ticket, login_result)
+        return await self.storage.create_session(data, language, account, password, mmt, ticket, login_result)
 
     async def update_session(self, id: str, session: Session) -> None:
         """Update a session.

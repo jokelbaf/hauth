@@ -25,8 +25,8 @@ class ReqEmailVerification(pydantic.BaseModel):
 class ReqLogin(pydantic.BaseModel):
     """Model containing login data."""
 
-    login: str
-    """Encrypted user's login (email)."""
+    account: str
+    """Encrypted user's account. Can be either email or username."""
 
     password: str
     """Encrypted user's password."""

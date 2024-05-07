@@ -674,7 +674,7 @@
             if (this.session.state === 'login_required') {
                 this.runForm(true);
                 const session = await this.sendRequest({
-                    login: encrypt(emailField.value),
+                    account: encrypt(emailField.value),
                     password: encrypt(passwordField.value)
                 });
                 if (!session) { return; } else { this.session = session; }

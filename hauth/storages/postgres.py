@@ -65,7 +65,7 @@ class PostgresSessionsStorage(SessionsStorage):
                     state TEXT,
                     data JSONB,
                     language TEXT,
-                    login TEXT,
+                    account TEXT,
                     password TEXT,
                     mmt JSONB,
                     ticket JSONB,
@@ -97,7 +97,7 @@ class PostgresSessionsStorage(SessionsStorage):
         self,
         data: typing.Optional[typing.Dict[typing.Any, typing.Any]] = None,
         language: typing.Optional[str] = "en",
-        login: typing.Optional[str] = None,
+        account: typing.Optional[str] = None,
         password: typing.Optional[str] = None,
         mmt: typing.Optional[genshin.models.SessionMMT] = None,
         ticket: typing.Optional[genshin.models.ActionTicket] = None,
@@ -107,7 +107,7 @@ class PostgresSessionsStorage(SessionsStorage):
         async with self.pool.acquire() as conn:
             created_session = await conn.fetchrow(
                 """INSERT INTO sessions (
-                    id, state, data, language, login, password, mmt, ticket, expiration_time, login_result
+                    id, state, data, language, account, password, mmt, ticket, expiration_time, login_result
                 ) VALUES (
                     $1, $2, $3, $4, $5, $6, $7, $8, NOW() + INTERVAL '1 second' * $9, $10
                 ) RETURNING *""",
@@ -115,7 +115,7 @@ class PostgresSessionsStorage(SessionsStorage):
                 State.UNDEFINED.value,
                 json.dumps(data) if data else None,
                 language,
-                login,
+                account,
                 password,
                 mmt.model_dump_json() if mmt else None,
                 ticket.model_dump_json() if ticket else None,
@@ -131,7 +131,7 @@ class PostgresSessionsStorage(SessionsStorage):
                     state = $1,
                     data = $2,
                     language = $3,
-                    login = $4,
+                    account = $4,
                     password = $5,
                     mmt = $6,
                     ticket = $7,
@@ -141,7 +141,7 @@ class PostgresSessionsStorage(SessionsStorage):
                 session.state.value,
                 json.dumps(session.data) if session.data else None,
                 session.language,
-                session.login,
+                session.account,
                 session.password,
                 session.mmt.model_dump_json() if session.mmt else None,
                 session.ticket.model_dump_json() if session.ticket else None,
