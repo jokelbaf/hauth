@@ -30,8 +30,6 @@ classifiers = [
     "Topic :: Utilities",
     "Typing :: Typed",
 ]
-[tool.setuptools.packages.find]
-where = "hauth"
 [tool.setuptools.package-data]
 "*" = ["*.*"]
 [tool.poetry.dependencies]
