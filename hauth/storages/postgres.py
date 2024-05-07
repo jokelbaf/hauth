@@ -1,10 +1,16 @@
 import asyncio
-import asyncpg
 import datetime
 import json
 import random
 import string
 import typing
+
+try:
+    import asyncpg
+except ImportError:
+    _asyncpg_installed = False
+else:
+    _asyncpg_installed = True
 
 import genshin
 
@@ -57,6 +63,9 @@ class PostgresSessionsStorage(SessionsStorage):
             await asyncio.sleep(self.cleanup_interval)
 
     async def initialize(self) -> None:
+        if not _asyncpg_installed:
+            raise ImportError("Postgres storage requires asyncpg to be installed: `pip install asyncpg`.")
+
         self.pool = await asyncpg.create_pool(self.dns)
         async with self.pool.acquire() as conn:
             await conn.execute("""
