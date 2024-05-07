@@ -27,7 +27,10 @@ classifiers = [
     "Topic :: Utilities",
     "Typing :: Typed",
 ]
-
+[tool.setuptools.packages.find]
+where = "hauth"
+[tool.setuptools.package-data]
+"*" = ["*.*"]
 [tool.poetry.dependencies]
 python = "^3.8"
 genshin = { git = "https://github.com/thesadru/genshin.py.git", branch = "dev" }

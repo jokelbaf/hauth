@@ -17,7 +17,7 @@ setup(
     python_requires = ">=3.8",
     install_requires = ["genshin @ git+https://github.com/thesadru/genshin.py.git@dev"],
     include_package_data = True,
-    package_data = {"hauth": ["py.typed"]},
+    package_data = {"hauth": ["assets/*"]},
     long_description = open("README.md", encoding="utf-8").read(),
     long_description_content_type = "text/markdown",
     license = "MIT",
