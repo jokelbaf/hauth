@@ -53,9 +53,6 @@ class Config(pydantic.BaseModel):
     This function may be called more than once for a single session (if user tries to login multiple times).
     """
 
-    ttl: typing.Optional[float] = 60 * 5
-    """How long does a single session lasts."""
-
     login_path: typing.Optional[str] = "/login"
     """Path for login page. The structure of the url is `{login_path}/{session_id}`"""
 
