@@ -6,7 +6,7 @@ from fastapi import FastAPI, Depends
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 
 from ..models import ReqLogin, ReqMMTResult, ReqEmailVerification, Session, Config
-from ..storages import MemorySessionsStorage
+from ..storages.base import SessionsStorage
 from .dependencies import session_dependency
 from ..client import HAuth
 
@@ -16,7 +16,7 @@ __all__ = ["HAuthFastAPI"]
 
 def HAuthFastAPI(
     app: FastAPI,
-    session_storage: MemorySessionsStorage,
+    session_storage: SessionsStorage,
     config: typing.Optional[Config] = Config(),
 ) -> FastAPI:
     """Initialize HoYoLab Auth for FastAPI app.

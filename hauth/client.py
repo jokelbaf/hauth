@@ -6,7 +6,7 @@ from pathlib import Path
 import genshin
 
 from .models.request import JSONResponse, ReqLogin, ReqMMTResult, ReqEmailVerification
-from .storages.memory import MemorySessionsStorage
+from .storages.base import SessionsStorage
 from .modules.geetest import get_lang_from_language
 from .models.session import Session, State
 from .modules.fprocessor import process
@@ -21,7 +21,7 @@ class HAuth:
 
     def __init__(
         self, 
-        storage: typing.Union[MemorySessionsStorage],
+        storage: SessionsStorage,
         config: Config
     ) -> None:
         self.config = config

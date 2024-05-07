@@ -4,6 +4,5 @@ Documentation: https://jokelbaf.github.io/hauth/
 """
 from .client import *
 from .models import *
-from .storages import *
 
 __version__ = "0.1.0"
