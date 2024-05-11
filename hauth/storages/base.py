@@ -7,7 +7,7 @@ import genshin
 from ..models import Session
 
 
-__all__ = ["SessionsStorage"]
+__all__ = ["SessionsStorage", "check_initialized"]
 
 
 class SessionsStorage(abc.ABC):
@@ -15,16 +15,16 @@ class SessionsStorage(abc.ABC):
 
     ttl: float
     """The TTL for sessions in seconds."""
-    
+
     on_expire: typing.Optional[typing.Callable[[Session], typing.Awaitable[None]]]
     """A callback function that is called when session expires."""
-    
+
     session_id_length: int
     """The length of randomly generated ID of each session."""
-    
+
     cleanup_interval: float
     """The interval in seconds to clean up expired sessions."""
-    
+
     initialized: bool = False
     """Whether the storage is initialized."""
 
@@ -35,14 +35,14 @@ class SessionsStorage(abc.ABC):
     @abc.abstractmethod
     async def initialize(self) -> None:
         """Initialize the storage.
-        
+
         The function must be called before or after app startup.
         """
 
     @abc.abstractmethod
     async def get_session(self, id: str) -> typing.Union[Session, None]:
         """Get session from the storage.
-        
+
         Args:
             id (str): The ID of the session.
         """
@@ -77,7 +77,7 @@ class SessionsStorage(abc.ABC):
     @abc.abstractmethod
     async def update_session(self, id: str, session: Session) -> None:
         """Update a session in the storage.
-        
+
         Args:
             id (str): The ID of the session.
             session (Session): The new session object.
@@ -86,7 +86,15 @@ class SessionsStorage(abc.ABC):
     @abc.abstractmethod
     async def delete_session(self, id: str) -> None:
         """Delete a session from the storage.
-        
+
         Args:
             id (str): The ID of the session.
         """
+
+def check_initialized(func: typing.Callable[..., None]) -> typing.Callable[..., None]:
+    """Decorator to check if the storage is initialized before calling any methods."""
+    def wrapper(self, *args, **kwargs):
+        if not self.initialized:
+            raise RuntimeError("Cannot call any methods before storage is initialized.")
+        return func(self, *args, **kwargs)
+    return wrapper

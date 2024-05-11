@@ -8,7 +8,7 @@ import typing
 import genshin
 
 from ..models import Session
-from .import SessionsStorage
+from .import SessionsStorage, check_initialized
 
 
 __all__ = ["MemorySessionsStorage"]
@@ -57,9 +57,11 @@ class MemorySessionsStorage(SessionsStorage):
         asyncio.create_task(self._cleanup_expired_sessions())
         self.initialized = True
 
+    @check_initialized
     async def get_session(self, id: str) -> typing.Union[Session, None]:
         return self._storage.get(id, None)
 
+    @check_initialized
     async def _generate_id(self) -> str:
         chars = string.ascii_letters + string.digits
         existing_ids = set(self._storage.keys())
@@ -69,6 +71,7 @@ class MemorySessionsStorage(SessionsStorage):
             if new_id not in existing_ids:
                 return new_id
 
+    @check_initialized
     async def create_session(
         self, 
         data: typing.Optional[typing.Dict[typing.Any, typing.Any]] = None,
@@ -94,9 +97,11 @@ class MemorySessionsStorage(SessionsStorage):
         self._storage[sid] = session
         return session
 
+    @check_initialized
     async def update_session(self, id: str, session: Session) -> None:
         self._storage[id] = session
 
+    @check_initialized
     async def delete_session(self, id: str) -> None:
         if id in self._storage:
             del self._storage[id]

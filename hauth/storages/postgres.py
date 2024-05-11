@@ -15,7 +15,7 @@ else:
 import genshin
 
 from ..models import Session, State
-from . import SessionsStorage
+from . import SessionsStorage, check_initialized
 
 
 __all__ = ["PostgresSessionsStorage"]
@@ -85,6 +85,7 @@ class PostgresSessionsStorage(SessionsStorage):
         asyncio.create_task(self._cleanup_expired_sessions())
         self.initialized = True
 
+    @check_initialized
     async def get_session(self, id: str) -> typing.Union[Session, None]:
         async with self.pool.acquire() as conn:
             session = await conn.fetchrow("SELECT * FROM sessions WHERE id = $1", id)
@@ -93,6 +94,7 @@ class PostgresSessionsStorage(SessionsStorage):
             else:
                 return None
 
+    @check_initialized
     async def _generate_id(self) -> str:
         chars = string.ascii_letters + string.digits
         async with self.pool.acquire() as conn:
@@ -102,6 +104,7 @@ class PostgresSessionsStorage(SessionsStorage):
                 if not session:
                     return new_id
 
+    @check_initialized
     async def create_session(
         self,
         data: typing.Optional[typing.Dict[typing.Any, typing.Any]] = None,
@@ -133,6 +136,7 @@ class PostgresSessionsStorage(SessionsStorage):
             )
             return Session(**created_session)
 
+    @check_initialized
     async def update_session(self, id: str, session: Session) -> None:
         async with self.pool.acquire() as conn:
             await conn.execute(
@@ -159,6 +163,7 @@ class PostgresSessionsStorage(SessionsStorage):
                 id,
             )
 
+    @check_initialized
     async def delete_session(self, id: str) -> None:
         async with self.pool.acquire() as conn:
             await conn.execute("DELETE FROM sessions WHERE id = $1", id)
