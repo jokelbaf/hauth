@@ -45,12 +45,18 @@ async def on_success(session):
 
 app = FastAPI(lifespan=lifespan)
 
-config = Config(on_success=on_success, login_page_style=LoginPageStyle(color=Color.GREEN, theme_mode=ThemeMode.LIGHT))
+page_style = LoginPageStyle(
+    color=Color.GREEN,
+    theme_mode=ThemeMode.LIGHT
+)
+config = Config(on_success=on_success, login_page_style=page_style)
+
 storage = MemorySessionsStorage(
     on_expire=on_expire,
     ttl=60*5,
     cleanup_interval=1
 )
+
 client = HAuth(storage=storage, config=config)
 
 app = HAuthFastAPI(app, client)
