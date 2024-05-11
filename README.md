@@ -14,6 +14,12 @@ pip install git+https://github.com/JokelBaf/hauth.git
 
 ## Usage
 
+Here are some examples of how you can use HAuth in your project.
+
+### Simple FastAPI app
+
+The app running on localhost:8000 will redirect you to the login page when you visit the root URL (`/`). After logging in, cookies will be printed in the console.
+
 ```python
 import uvicorn
 from fastapi import FastAPI
