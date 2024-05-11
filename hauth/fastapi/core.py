@@ -23,8 +23,7 @@ def HAuthFastAPI(
 
     Args:
         app (FastAPI): The FastAPI app.
-        session_storage (MemorySessionsStorage): The session storage.
-        hauth_config (typing.Optional[Config], optional): The configuration for HoYoLab Auth.
+        client (HAuth): The HAuth client.
     """
     setattr(app, "hauth", client)
 
