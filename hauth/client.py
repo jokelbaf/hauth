@@ -66,7 +66,7 @@ class HAuth:
         ticket: typing.Optional[genshin.models.ActionTicket] = None
     ) -> Session:
         """Try to login the user.
-        
+
         Args:
             session (Session): The session to login.
             mmt_result (typing.Optional[genshin.models.SessionMMTResult]): Result of solving the geetest.
@@ -97,7 +97,7 @@ class HAuth:
         ticket: genshin.models.ActionTicket
     ) -> typing.Tuple[Session, bool]:
         """Try to verify the email. Returns `True` on success, `False` otherwise.
-        
+
         Args:
             session (Session): The session to verify the email.
             code (str): Email verification code.
@@ -286,6 +286,14 @@ class HAuth:
             login_result (typing.Optional[genshin.models.AppLoginResult]): The login result added to session after successful login.
         """
         return await self.storage.create_session(data, language, account, password, mmt, ticket, login_result)
+
+    async def get_session(self, id: str) -> typing.Union[Session, None]:
+        """Get a session.
+
+        Args:
+            id (str): The ID of the session.
+        """
+        return await self.storage.get_session(id)
 
     async def update_session(self, id: str, session: Session) -> None:
         """Update a session.
