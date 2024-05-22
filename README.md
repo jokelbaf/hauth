@@ -142,8 +142,8 @@ if __name__ == "__main__":
 ### Discord.py bot + FastAPI
 
 It is recommended to use IPC for Discord bots, that's why HAuth provides built-in support for it. However, you will need to split the bot and the web server into two separate processes.
-<details>
-<summary>Bot</summary>
+
+#### Bot
 ```python
 import logging
 import typing
@@ -255,9 +255,8 @@ async def login(i: discord.Interaction) -> None:
 
 bot.run("TOKEN")
 ```
-</details>
-<details>
-<summary>Web server</summary>
+
+#### Web server
 ```python
 import uvicorn
 import fastapi
