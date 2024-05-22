@@ -20,8 +20,6 @@ Here are some examples of how you can use HAuth in your project.
 
 The app running on `http://localhost:8000` will redirect you to the login page when you visit the root URL. After logging in, cookies will be printed in the console.
 
-<details>
-<summary>Click to see the code</summary>
 ```python
 import uvicorn
 from fastapi import FastAPI
@@ -76,14 +74,11 @@ async def root() -> RedirectResponse:
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 ```
-</details>
 
 ### Simple AIOHTTP app
 
 Same as the FastAPI example, but with AIOHTTP and some small differences like `on_error` callback.
 
-<details>
-<summary>Click to see the code</summary>
 ```python
 from aiohttp import web
 
@@ -137,7 +132,6 @@ app.add_routes([web.get("/", root)])
 if __name__ == "__main__":
     web.run_app(app, host="0.0.0.0", port=8000)
 ```
-</details>
 
 ### Discord.py bot + FastAPI
 
